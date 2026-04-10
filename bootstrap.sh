@@ -64,7 +64,8 @@ gh auth login
 # --- Clone dotfiles ---
 echo ""
 if [[ -d "$HOME/dotfiles" ]]; then
-    echo "[ok] ~/dotfiles already exists"
+    echo "[ok] ~/dotfiles already exists, pulling latest..."
+    git -C ~/dotfiles pull
 else
     echo "[..] Cloning dotfiles..."
     git clone git@github.com:azheng8/dotfiles.git ~/dotfiles
