@@ -70,6 +70,13 @@ else
     git clone git@github.com:azheng8/dotfiles.git ~/dotfiles
 fi
 
+# --- Clean up files that conflict with stow ---
+echo "[..] Cleaning up pre-existing configs that conflict with stow..."
+rm -f ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/Brewfile
+rm -rf ~/.config/nvim ~/.config/ghostty ~/.config/aerospace
+rm -rf ~/.config/kitty ~/.config/karabiner ~/.config/git
+rm -rf ~/.config/opencode
+
 # --- Bootstrap dotfiles ---
 echo "[..] Running dotfiles bootstrap..."
 cd ~/dotfiles && just bootstrap
