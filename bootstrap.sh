@@ -77,7 +77,7 @@ mkdir -p "$BACKUP_DIR"
 for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/Brewfile; do
     [[ -e "$f" || -L "$f" ]] && mv "$f" "$BACKUP_DIR/"
 done
-for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/opencode; do
+for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/gh ~/.config/opencode; do
     [[ -e "$d" || -L "$d" ]] && mv "$d" "$BACKUP_DIR/"
 done
 echo "[ok] Backed up existing configs to $BACKUP_DIR"
