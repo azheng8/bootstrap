@@ -28,15 +28,16 @@ else
 fi
 
 # --- Homebrew ---
-if command -v brew &>/dev/null; then
-    echo "[ok] Homebrew already installed"
-else
+if ! command -v brew &>/dev/null; then
     echo "[..] Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    # Add Homebrew to PATH for Apple Silicon
-    if [[ -f /opt/homebrew/bin/brew ]]; then
-        eval "$(/opt/homebrew/bin/brew shellenv)"
-    fi
+else
+    echo "[ok] Homebrew already installed"
+fi
+
+# Ensure Homebrew is in PATH (Apple Silicon)
+if [[ -f /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
 # --- Core packages ---
