@@ -70,12 +70,16 @@ else
     git clone git@github.com:azheng8/dotfiles.git ~/dotfiles
 fi
 
-# --- Clean up files that conflict with stow ---
-echo "[..] Cleaning up pre-existing configs that conflict with stow..."
-rm -f ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/Brewfile
-rm -rf ~/.config/nvim ~/.config/ghostty ~/.config/aerospace
-rm -rf ~/.config/kitty ~/.config/karabiner ~/.config/git
-rm -rf ~/.config/opencode
+# --- Back up files that conflict with stow ---
+BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/Brewfile; do
+    [[ -e "$f" || -L "$f" ]] && mv "$f" "$BACKUP_DIR/"
+done
+for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/opencode; do
+    [[ -e "$d" || -L "$d" ]] && mv "$d" "$BACKUP_DIR/"
+done
+echo "[ok] Backed up existing configs to $BACKUP_DIR"
 
 # --- Bootstrap dotfiles ---
 echo "[..] Running dotfiles bootstrap..."
