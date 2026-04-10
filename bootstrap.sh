@@ -58,8 +58,12 @@ read -p "  Press enter when done... "
 
 # --- GitHub auth ---
 echo ""
-echo "[..] Setting up GitHub authentication..."
-gh auth login
+if gh auth status &>/dev/null; then
+    echo "[ok] GitHub CLI already authenticated"
+else
+    echo "[..] Setting up GitHub authentication..."
+    gh auth login
+fi
 
 # --- Clone dotfiles ---
 echo ""
