@@ -67,12 +67,14 @@ fi
 
 # --- Clone dotfiles ---
 echo ""
-if [[ -d "$HOME/dotfiles" ]]; then
-    echo "[ok] ~/dotfiles already exists, pulling latest..."
-    git -C ~/dotfiles pull
+DOTFILES="$HOME/code/azheng8/dotfiles"
+mkdir -p "$HOME/code/azheng8"
+if [[ -d "$DOTFILES" ]]; then
+    echo "[ok] $DOTFILES already exists, pulling latest..."
+    git -C "$DOTFILES" pull
 else
     echo "[..] Cloning dotfiles..."
-    git clone git@github.com:azheng8/dotfiles.git ~/dotfiles
+    git clone git@github.com:azheng8/dotfiles.git "$DOTFILES"
 fi
 
 # --- Back up files that conflict with stow ---
@@ -88,7 +90,7 @@ echo "[ok] Backed up existing configs to $BACKUP_DIR"
 
 # --- Bootstrap dotfiles ---
 echo "[..] Running dotfiles bootstrap..."
-cd ~/dotfiles && just bootstrap
+cd "$DOTFILES" && just bootstrap
 
 # --- Work setup prompt ---
 echo ""
@@ -97,7 +99,7 @@ echo "  Bootstrap complete!"
 echo "================================================"
 echo ""
 echo "  If this is a work machine, run:"
-echo "    cd ~/dotfiles && just work"
+echo "    cd ~/code/azheng8/dotfiles && just work"
 echo ""
 echo "  Restart your shell:"
 echo "    exec zsh"
