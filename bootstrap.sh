@@ -87,7 +87,7 @@ fi
 echo ""
 if ! command -v nix &>/dev/null; then
     echo "[..] Installing Nix via Determinate Systems installer..."
-    curl -fsSL https://install.determinate.systems | sh -s -- install --no-confirm
+    curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
     
     # Source the Nix daemon script immediately so we can use Nix in the rest of this session
     if [[ -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
