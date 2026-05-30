@@ -34,6 +34,19 @@ case $PROFILE_CHOICE in
     *) echo "Invalid choice, defaulting to macbook-personal"; PROFILE="macbook-personal" ;;
 esac
 
+# --- MDM enrollment reminder (work profiles only, non-blocking) ---
+if [[ "$PROFILE" == "macbook" || "$PROFILE" == "macmini" ]]; then
+    echo "------------------------------------------------"
+    echo "  FYI: Work machine"
+    echo "------------------------------------------------"
+    echo "  This bootstrap does NOT require MDM or the VPN."
+    echo "  But you will need MDM enrollment later for VPN"
+    echo "  and internal services (e.g. the Rokt MCP gateway)."
+    echo "  Enroll any time at go/mdm (see docs/nix-setup.md)."
+    echo "------------------------------------------------"
+    echo ""
+fi
+
 # --- Xcode Command Line Tools ---
 if xcode-select -p &>/dev/null; then
     echo "[ok] Xcode CLT already installed"
