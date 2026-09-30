@@ -4,6 +4,12 @@ Bare metal macOS to fully configured modular Nix-darwin + Home Manager dev machi
 
 ## Usage
 
+Recommended (preserves standard input for interactive prompts):
+```sh
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/azheng8/bootstrap/main/bootstrap.sh)"
+```
+
+Alternatively (piped):
 ```sh
 curl -fsSL https://raw.githubusercontent.com/azheng8/bootstrap/main/bootstrap.sh | bash
 ```
