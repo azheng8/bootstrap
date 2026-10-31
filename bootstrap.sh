@@ -130,18 +130,23 @@ else
 fi
 
 # --- Homebrew ---
-if ! command -v brew &>/dev/null; then
-    echo "[..] Installing Homebrew..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-else
-    echo "[ok] Homebrew already installed"
-fi
-
-# Ensure Homebrew is in PATH (Apple Silicon & Intel)
+# Ensure Homebrew is in PATH first if already installed on disk (e.g. from a previous partial run)
 if [[ -f /opt/homebrew/bin/brew ]]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [[ -f /usr/local/bin/brew ]]; then
     eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if ! command -v brew &>/dev/null; then
+    echo "[..] Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    if [[ -f /opt/homebrew/bin/brew ]]; then
+        eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -f /usr/local/bin/brew ]]; then
+        eval "$(/usr/local/bin/brew shellenv)"
+    fi
+else
+    echo "[ok] Homebrew already installed"
 fi
 
 # --- Core packages ---
@@ -151,7 +156,10 @@ if ! [[ -d "/Applications/1Password.app" ]]; then
 else
     echo "[ok] 1Password is already installed in /Applications"
 fi
-brew install 1password-cli gh just git
+if ! command -v op &>/dev/null; then
+    brew install --cask 1password-cli
+fi
+brew install gh just git stow
 
 # --- 1Password setup (manual) ---
 echo ""
@@ -180,10 +188,13 @@ fi
 
 # --- Nix installation ---
 echo ""
-if ! command -v nix &>/dev/null; then
+if [[ -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
+    . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
+fi
+if ! command -v nix &>/dev/null && [[ ! -x "/nix/var/nix/profiles/default/bin/nix" ]]; then
     echo "[..] Installing Nix via Determinate Systems installer..."
     curl -fsSL https://install.determinate.systems/nix | sh -s -- install --no-confirm
-    
+
     # Source the Nix daemon script immediately so we can use Nix in the rest of this session
     if [[ -f "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" ]]; then
         . "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh"
@@ -194,25 +205,43 @@ fi
 
 # --- Clone dotfiles ---
 echo ""
+mkdir -p "$HOME/.ssh"
+chmod 700 "$HOME/.ssh"
+if ! grep -q "^github.com " "$HOME/.ssh/known_hosts" 2>/dev/null; then
+    echo "[..] Adding github.com to ~/.ssh/known_hosts..."
+    ssh-keyscan -t ed25519,rsa,ecdsa github.com >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+fi
+export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=accept-new"
+
 DOTFILES="$HOME/code/azheng8/dotfiles"
 mkdir -p "$HOME/code/azheng8"
-if [[ -d "$DOTFILES" ]]; then
+if [[ -d "$DOTFILES/.git" ]]; then
     echo "[ok] $DOTFILES already exists, pulling latest..."
     git -C "$DOTFILES" pull
 else
+    rm -rf "$DOTFILES"
     echo "[..] Cloning dotfiles..."
-    git clone git@github.com:azheng8/dotfiles.git "$DOTFILES"
+    git clone git@github.com:azheng8/dotfiles.git "$DOTFILES" || gh repo clone azheng8/dotfiles "$DOTFILES"
 fi
+
+# --- Set up Oh-My-Zsh first (before backing up ~/.zshrc so OMZ doesn't recreate it) ---
+echo ""
+echo "[..] Setting up Oh-My-Zsh & Custom Plugins..."
+cd "$DOTFILES" && just setup-omz
 
 # --- Back up files that conflict with Home Manager ---
 echo ""
 BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
 for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/Brewfile; do
-    [[ -e "$f" || -L "$f" ]] && mv "$f" "$BACKUP_DIR/" && echo "Backed up $f"
+    if [[ ( -e "$f" || -L "$f" ) && "$(readlink "$f" 2>/dev/null)" != /nix/store/* ]]; then
+        mv "$f" "$BACKUP_DIR/" && echo "Backed up $f"
+    fi
 done
-for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/gh ~/.config/opencode; do
-    [[ -e "$d" || -L "$d" ]] && mv "$d" "$BACKUP_DIR/" && echo "Backed up $d"
+for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/opencode; do
+    if [[ ( -e "$d" || -L "$d" ) && "$(readlink "$d" 2>/dev/null)" != /nix/store/* ]]; then
+        mv "$d" "$BACKUP_DIR/" && echo "Backed up $d"
+    fi
 done
 if [ -n "$(ls -A "$BACKUP_DIR" 2>/dev/null)" ]; then
     echo "[ok] Conflicting configs backed up to $BACKUP_DIR"
@@ -222,10 +251,6 @@ else
 fi
 
 # --- Run Nix Bootstrap ---
-echo ""
-echo "[..] Setting up Oh-My-Zsh & Custom Plugins..."
-cd "$DOTFILES" && just setup-omz
-
 echo ""
 echo "[..] Running Nix-darwin bootstrap with profile: $PROFILE..."
 if [[ "$PROFILE" == "personal" ]]; then
