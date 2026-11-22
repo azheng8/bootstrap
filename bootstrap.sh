@@ -225,11 +225,8 @@ DOTFILES="$HOME/code/azheng8/dotfiles"
 mkdir -p "$HOME/code/azheng8"
 if [[ -d "$DOTFILES/.git" ]]; then
     echo "[ok] $DOTFILES already exists, pulling latest..."
-    # Clear Nix's `git add -N flake.lock` intent-to-add entry if flake.lock is not yet committed,
-    # otherwise `git pull --autostash` fails with "Entry 'flake.lock' not uptodate".
-    if ! git -C "$DOTFILES" cat-file -e HEAD:flake.lock 2>/dev/null; then
-        git -C "$DOTFILES" rm --cached --quiet --ignore-unmatch flake.lock 2>/dev/null || true
-    fi
+    # Unstage any Nix-created/staged flake.lock (e.g. `git add -N flake.lock`) before autostash
+    git -C "$DOTFILES" reset --quiet -- flake.lock 2>/dev/null || true
     git -C "$DOTFILES" pull --autostash
 else
     rm -rf "$DOTFILES"
