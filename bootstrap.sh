@@ -162,7 +162,7 @@ fi
 brew install gh just git
 brew tap nikitabobko/tap 2>/dev/null || true
 brew trust --tap nikitabobko/tap 2>/dev/null || true
-for app_cask in alfred ghostty nikitabobko/tap/aerospace; do
+for app_cask in google-chrome alfred ghostty nikitabobko/tap/aerospace; do
     brew install --cask "$app_cask" || true
 done
 
@@ -174,6 +174,7 @@ echo "================================================"
 echo ""
 echo "  1. Open 1Password and sign in to your account(s)"
 echo "  2. Settings -> Developer -> enable 'Integrate with 1Password CLI'"
+echo "  3. Settings -> Developer -> enable 'Use the SSH agent' (recommended)"
 echo ""
 open -a "1Password" 2>/dev/null || true
 prompt_read -p "  Press enter when done... " || true
@@ -183,13 +184,15 @@ echo ""
 if gh auth status &>/dev/null; then
     echo "[ok] GitHub CLI already authenticated"
 else
-    echo "[..] Setting up GitHub authentication..."
+    echo "[..] Setting up GitHub authentication (HTTPS)..."
+    echo "     Tip: You can approve the device code at https://github.com/login/device on your phone or Chrome."
     if has_tty && [[ ! -t 0 ]]; then
-        gh auth login < /dev/tty
+        gh auth login --git-protocol https --web < /dev/tty
     else
-        gh auth login
+        gh auth login --git-protocol https --web
     fi
 fi
+gh auth setup-git 2>/dev/null || true
 
 # --- Nix installation ---
 echo ""
@@ -225,8 +228,8 @@ if [[ -d "$DOTFILES/.git" ]]; then
     git -C "$DOTFILES" pull --autostash
 else
     rm -rf "$DOTFILES"
-    echo "[..] Cloning dotfiles..."
-    git clone git@github.com:azheng8/dotfiles.git "$DOTFILES" || gh repo clone azheng8/dotfiles "$DOTFILES"
+    echo "[..] Cloning dotfiles (HTTPS via gh)..."
+    git clone https://github.com/azheng8/dotfiles.git "$DOTFILES" || gh repo clone azheng8/dotfiles "$DOTFILES"
 fi
 
 # --- Set up Oh-My-Zsh first (before backing up ~/.zshrc so OMZ doesn't recreate it) ---
@@ -238,7 +241,7 @@ cd "$DOTFILES" && just setup-omz
 echo ""
 BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
-for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/.gitignore_global ~/.gitconfig ~/.gitconfig-rokt ~/.gitconfig-mparticle ~/.zshrc.d/rokt.zsh ~/bin/aws-vault ~/.claude/CLAUDE.md ~/.claude/settings.json; do
+for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/.gitignore_global ~/.gitconfig ~/.gitconfig-rokt ~/.gitconfig-mparticle ~/.zshrc.d/rokt.zsh ~/bin/aws-vault ~/.claude/CLAUDE.md ~/.claude/settings.json ~/.ssh/config; do
     target="$(readlink "$f" 2>/dev/null || true)"
     if [[ ( -e "$f" || -L "$f" ) && "$target" != /nix/store/* && "$target" != "$DOTFILES/"* ]]; then
         mv "$f" "$BACKUP_DIR/" && echo "Backed up $f"
