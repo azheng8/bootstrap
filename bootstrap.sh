@@ -271,6 +271,11 @@ echo ""
 echo "[..] Restoring secrets & cryptographic keys..."
 just secrets
 
+# --- Post-setup app wiring & health check ---
+echo ""
+echo "[..] Running post-setup & validation..."
+just post-setup
+
 echo ""
 echo "================================================"
 echo "  Nix Bootstrap Complete!"
@@ -278,4 +283,7 @@ echo "================================================"
 echo ""
 echo "  Restart your shell to activate your new environment:"
 echo "    exec zsh"
+echo ""
+echo "  Re-run checks any time with:"
+echo "    cd $DOTFILES && just doctor"
 echo ""
