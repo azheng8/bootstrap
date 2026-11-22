@@ -159,7 +159,7 @@ fi
 if ! command -v op &>/dev/null; then
     brew install --cask 1password-cli
 fi
-brew install gh just git stow
+brew install gh just git
 brew tap nikitabobko/tap 2>/dev/null || true
 brew trust --tap nikitabobko/tap 2>/dev/null || true
 for app_cask in alfred ghostty nikitabobko/tap/aerospace; do
@@ -238,13 +238,13 @@ cd "$DOTFILES" && just setup-omz
 echo ""
 BACKUP_DIR="$HOME/.config-backup-$(date +%Y%m%d_%H%M%S)"
 mkdir -p "$BACKUP_DIR"
-for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/.gitignore_global ~/Brewfile ~/.gitconfig ~/.gitconfig-rokt ~/.gitconfig-mparticle ~/.zshrc.d/rokt.zsh ~/bin/aws-vault ~/.claude/CLAUDE.md ~/.claude/settings.json; do
+for f in ~/.zshrc ~/.tmux.conf ~/.p10k.zsh ~/.gitignore_global ~/.gitconfig ~/.gitconfig-rokt ~/.gitconfig-mparticle ~/.zshrc.d/rokt.zsh ~/bin/aws-vault ~/.claude/CLAUDE.md ~/.claude/settings.json; do
     target="$(readlink "$f" 2>/dev/null || true)"
     if [[ ( -e "$f" || -L "$f" ) && "$target" != /nix/store/* && "$target" != "$DOTFILES/"* ]]; then
         mv "$f" "$BACKUP_DIR/" && echo "Backed up $f"
     fi
 done
-for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/karabiner ~/.config/git ~/.config/opencode ~/.config/zellij ~/.config/yazi ~/.config/linearmouse ~/.config/jj ~/docs; do
+for d in ~/.config/nvim ~/.config/ghostty ~/.config/aerospace ~/.config/kitty ~/.config/git ~/.config/opencode ~/.config/zellij ~/.config/yazi ~/.config/linearmouse ~/.config/jj ~/docs; do
     target="$(readlink "$d" 2>/dev/null || true)"
     if [[ ( -e "$d" || -L "$d" ) && "$target" != /nix/store/* && "$target" != "$DOTFILES/"* ]]; then
         mv "$d" "$BACKUP_DIR/" && echo "Backed up $d"

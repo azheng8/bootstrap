@@ -22,7 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/azheng8/bootstrap/main/bootstrap.sh
 4. Pauses for 1Password sign-in & CLI Biometrics integration
 5. Runs `gh auth login` (authenticates your GitHub account and links SSH key)
 6. Installs Determinate Nix
-7. Clones [dotfiles](https://github.com/azheng8/dotfiles) (on the `az/migrate-to-nix` branch)
+7. Clones [dotfiles](https://github.com/azheng8/dotfiles) (`master`)
 8. Prompts you to select a profile (`macbook`, `macbook-personal`, `macmini`, `macmini-personal`)
 9. Backs up conflicting configs under `~` to prevent Home Manager conflicts
 10. Sets up Oh-My-Zsh & plugins
